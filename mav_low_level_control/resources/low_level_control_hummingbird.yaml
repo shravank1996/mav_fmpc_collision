@@ -1,0 +1,17 @@
+rotor_force_constant: 8.54858e-6
+rotor_moment_constant: 0.016000
+arm_length: 0.17
+sampling_time: 0.01
+
+inertia : [ 0.007 ,0.007,0.012]
+allocation_matrix: [ 0.0 , -1.0 , 1.0 , 1.0 , 1.0 , 0.0 , -1.0 , 1.0, 0.0, 1.0, 1.0, 1.0, -1.0, 0.0, -1.0, 1.0]
+n_rotors: 4
+
+rotaional_drag_coefficients: [0.1, 0.1, 0.1]
+
+omega1_gain: 20
+omega2_gain: 15
+omega3_gain: 22
+
+process_noise: [0.15, 0.13, 0.1, 0.25, 0.25, 0.3]
+system_noise: [0.1, 0.1, 0.1,0.1, 0.1, 0.1]

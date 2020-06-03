@@ -1,0 +1,9 @@
+
+height: 0.3
+radius: 0.6
+
+discretization: 0.1
+collision_check_time: 1.0
+
+acceleration_weight: 0.3
+drag_offset: 1.0

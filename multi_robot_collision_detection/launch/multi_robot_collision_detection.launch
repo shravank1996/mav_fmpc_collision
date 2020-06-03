@@ -1,0 +1,874 @@
+<?xml version ="1"?>
+<launch>
+  <arg name="world_name" default="basic"/>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="mav_name" default="firefly" />
+
+  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
+  <env name="GAZEBO_RESOURCE_PATH" value="$ot{GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world"/>
+    <!-- <arg name="debug" value="true"/> -->
+    <arg name="paused" value="true"/>
+    <!-- <arg name="gui" value="false"/> -->
+  </include>      
+  <group ns="$(arg mav_name)1">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)1" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)1"/>
+      <arg name="x" value="1.0"/>
+      <arg name="y" value="-1.0"/>
+      <arg name="z" value="1.0"/> 	
+    </include>
+    <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="log">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+	
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="log">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="3 2 1 0 1"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  </group>
+
+  <group ns="$(arg mav_name)2">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)2" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)2"/>
+      <arg name="x" value="1.0"/>
+      <arg name="y" value="1.0"/>
+      <arg name="z" value="2.0"/> 	>
+    </include>
+        <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="log">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+<node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="1.0"/>
+    </node>
+	<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen">
+        <param name="robot_number" value="2"/>
+        <param name="publisher_dt" value="0.01"/>
+        </node>	
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="log">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="3 2 1 0 1"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  </group>
+
+  <group ns="$(arg mav_name)3">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)3" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)3"/>
+      <arg name="x" value="-1.0"/>
+      <arg name="y" value="-1.0"/>
+      <arg name="z" value="2.0"/> 	
+    </include>
+        <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="log">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+<node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="1.0"/>
+    </node>
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="log">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="3 2 1 0 1"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+	<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen">
+        <param name="robot_number" value="3"/>
+        <param name="publisher_dt" value="0.01"/>
+        </node>	
+  </group>
+
+  <group ns="$(arg mav_name)4">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)4" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)4"/>
+      <arg name="x" value="-1.0"/>
+      <arg name="y" value="1.0"/>
+      <arg name="z" value="2.0"/> 	
+    </include>
+    <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="log">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="log">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="3 2 1 0 1"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+<node name="collision_detection" pkg="multi_robot_collision_detection" type="multi_robot_collision_detection_node" respawn="true" clear_params="true" output="screen">
+ <rosparam file="$(find multi_robot_collision_detection)/resources/collision_detection.yaml"/>
+ <param name="number_of_robots" value="5"/>
+</node>		
+  </group>
+
+  <group ns="$(arg mav_name)5">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)5" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)5"/>
+      <arg name="x" value="0.0"/>
+      <arg name="y" value="0.0"/>
+      <arg name="z" value="2.0"/> 	
+    </include>
+    <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="log">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="log">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="3 2 1 0 1"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <node name="collision_detection" pkg="multi_robot_collision_detection" type="multi_robot_collision_detection_node" respawn="true" clear_params="true" output="screen">
+ <rosparam file="$(find multi_robot_collision_detection)/resources/collision_detection.yaml"/>
+ <param name="number_of_robots" value="5" />
+</node>	
+  </group>
+
+  <!--group ns="$(arg mav_name)6">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)6" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)1"/>
+      <arg name="x" value="1.0"/>
+      <arg name="y" value="-1.0"/>
+      <arg name="z" value="2.0"/> 	
+    </include>
+<node name="traj_generation" pkg="asl_msgs" type="MultiRobotTrajectory_node.py" respawn="true" clear_params="true" output="screen" >
+      <param name="collision_weight" value="10.0" type='double'/>
+      <param name="dynamics_weight" value="1.0" type='double'/>
+      <param name="time_weight" value="10.0" type='double'/>
+      <param name="acceleration_limit_weight" value="2.0" type='double'/>
+      <param name="jerk_limit_weight" value="2.0" type='double'/>
+      <param name="velocity_limit_weight" value="10.0" type='double'/>
+      <param name="velocity_limit" value="4.0" type='double'/>
+      <param name="acceleration_limit" value="6.0" type='double'/>
+      <param name="jerk_limit" value="8.0" type='double'/>
+      <param name="discretization" value="0.01" type='double'/>
+      </node>
+
+        <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+    <node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="0.6"/>
+    </node>
+	<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen"/>	
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="3 -1 1 0 2"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  </group>
+
+  <group ns="$(arg mav_name)7">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)7" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)2"/>
+      <arg name="x" value="1.0"/>
+      <arg name="y" value="1.0"/>
+      <arg name="z" value="2.0"/> 	>
+    </include>
+<node name="traj_generation" pkg="asl_msgs" type="MultiRobotTrajectory_node.py" respawn="true" clear_params="true" output="screen" >
+      <param name="collision_weight" value="10.0" type='double'/>
+      <param name="dynamics_weight" value="1.0" type='double'/>
+      <param name="time_weight" value="10.0" type='double'/>
+      <param name="acceleration_limit_weight" value="2.0" type='double'/>
+      <param name="jerk_limit_weight" value="2.0" type='double'/>
+      <param name="velocity_limit_weight" value="10.0" type='double'/>
+      <param name="velocity_limit" value="4.0" type='double'/>
+      <param name="acceleration_limit" value="6.0" type='double'/>
+      <param name="jerk_limit" value="8.0" type='double'/>
+      <param name="discretization" value="0.01" type='double'/>
+      </node>
+
+        <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+<node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="0.6"/>
+    </node>
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="1 -1 2 0 2"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen"/>
+  </group>
+
+  <group ns="$(arg mav_name)8">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)8" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)3"/>
+      <arg name="x" value="-1.0"/>
+      <arg name="y" value="-1.0"/>
+      <arg name="z" value="2.0"/> 	
+    </include>
+<node name="traj_generation" pkg="asl_msgs" type="MultiRobotTrajectory_node.py" respawn="true" clear_params="true" output="screen" >
+      <param name="collision_weight" value="10.0" type='double'/>
+      <param name="dynamics_weight" value="1.0" type='double'/>
+      <param name="time_weight" value="10.0" type='double'/>
+      <param name="acceleration_limit_weight" value="2.0" type='double'/>
+      <param name="jerk_limit_weight" value="2.0" type='double'/>
+      <param name="velocity_limit_weight" value="10.0" type='double'/>
+      <param name="velocity_limit" value="4.0" type='double'/>
+      <param name="acceleration_limit" value="6.0" type='double'/>
+      <param name="jerk_limit" value="8.0" type='double'/>
+      <param name="discretization" value="0.01" type='double'/>
+      </node>
+
+        <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+<node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="0.6"/>
+    </node>
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="2.5 -0.5 2 0 3"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen"/>
+  </group>
+
+  <group ns="$(arg mav_name)9">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)9" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)4"/>
+      <arg name="x" value="-1.0"/>
+      <arg name="y" value="1.0"/>
+      <arg name="z" value="2.0"/> 	
+    </include>
+<node name="traj_generation" pkg="asl_msgs" type="MultiRobotTrajectory_node.py" respawn="true" clear_params="true" output="screen" >
+      <param name="collision_weight" value="10.0" type='double'/>
+      <param name="dynamics_weight" value="1.0" type='double'/>
+      <param name="time_weight" value="10.0" type='double'/>
+      <param name="acceleration_limit_weight" value="2.0" type='double'/>
+      <param name="jerk_limit_weight" value="2.0" type='double'/>
+      <param name="velocity_limit_weight" value="10.0" type='double'/>
+      <param name="velocity_limit" value="4.0" type='double'/>
+      <param name="acceleration_limit" value="6.0" type='double'/>
+      <param name="jerk_limit" value="8.0" type='double'/>
+      <param name="discretization" value="0.01" type='double'/>
+      </node>
+
+    <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+<node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="0.6"/>
+    </node>
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="1 -2 2 0 2"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen"/>
+  </group>
+
+  <group ns="$(arg mav_name)10">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)10" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)5"/>
+      <arg name="x" value="0.0"/>
+      <arg name="y" value="0.0"/>
+      <arg name="z" value="2.0"/> 	
+    </include>
+<node name="traj_generation" pkg="asl_msgs" type="MultiRobotTrajectory_node.py" respawn="true" clear_params="true" output="screen" >
+      <param name="collision_weight" value="10.0" type='double'/>
+      <param name="dynamics_weight" value="1.0" type='double'/>
+      <param name="time_weight" value="10.0" type='double'/>
+      <param name="acceleration_limit_weight" value="2.0" type='double'/>
+      <param name="jerk_limit_weight" value="2.0" type='double'/>
+      <param name="velocity_limit_weight" value="10.0" type='double'/>
+      <param name="velocity_limit" value="4.0" type='double'/>
+      <param name="acceleration_limit" value="6.0" type='double'/>
+      <param name="jerk_limit" value="8.0" type='double'/>
+      <param name="discretization" value="0.01" type='double'/>
+      </node>
+
+    <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+<node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="0.6"/>
+    </node>
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="2 2 2 0 2"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen"/>
+  </group-->
+
+  <!--group ns="$(arg mav_name)11">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)11" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)1"/>
+      <arg name="x" value="1.0"/>
+      <arg name="y" value="-1.0"/>
+      <arg name="z" value="2.0"/> 	
+    </include>
+<node name="traj_generation" pkg="asl_msgs" type="MultiRobotTrajectory_node.py" respawn="true" clear_params="true" output="screen" >
+      <param name="collision_weight" value="10.0" type='double'/>
+      <param name="dynamics_weight" value="1.0" type='double'/>
+      <param name="time_weight" value="10.0" type='double'/>
+      <param name="acceleration_limit_weight" value="2.0" type='double'/>
+      <param name="jerk_limit_weight" value="2.0" type='double'/>
+      <param name="velocity_limit_weight" value="10.0" type='double'/>
+      <param name="velocity_limit" value="4.0" type='double'/>
+      <param name="acceleration_limit" value="6.0" type='double'/>
+      <param name="jerk_limit" value="8.0" type='double'/>
+      <param name="discretization" value="0.01" type='double'/>
+      </node>
+
+        <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+    <node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="0.6"/>
+    </node>
+	<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen"/>	
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="3 -1 1 0 2"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  </group>
+
+  <group ns="$(arg mav_name)12">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)12" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)2"/>
+      <arg name="x" value="1.0"/>
+      <arg name="y" value="1.0"/>
+      <arg name="z" value="2.0"/> 	>
+    </include>
+<node name="traj_generation" pkg="asl_msgs" type="MultiRobotTrajectory_node.py" respawn="true" clear_params="true" output="screen" >
+      <param name="collision_weight" value="10.0" type='double'/>
+      <param name="dynamics_weight" value="1.0" type='double'/>
+      <param name="time_weight" value="10.0" type='double'/>
+      <param name="acceleration_limit_weight" value="2.0" type='double'/>
+      <param name="jerk_limit_weight" value="2.0" type='double'/>
+      <param name="velocity_limit_weight" value="10.0" type='double'/>
+      <param name="velocity_limit" value="4.0" type='double'/>
+      <param name="acceleration_limit" value="6.0" type='double'/>
+      <param name="jerk_limit" value="8.0" type='double'/>
+      <param name="discretization" value="0.01" type='double'/>
+      </node>
+
+        <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+<node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="0.6"/>
+    </node>
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="1 -1 2 0 2"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen"/>
+  </group>
+
+  <group ns="$(arg mav_name)13">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)13" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)3"/>
+      <arg name="x" value="-1.0"/>
+      <arg name="y" value="-1.0"/>
+      <arg name="z" value="2.0"/> 	
+    </include>
+<node name="traj_generation" pkg="asl_msgs" type="MultiRobotTrajectory_node.py" respawn="true" clear_params="true" output="screen" >
+      <param name="collision_weight" value="10.0" type='double'/>
+      <param name="dynamics_weight" value="1.0" type='double'/>
+      <param name="time_weight" value="10.0" type='double'/>
+      <param name="acceleration_limit_weight" value="2.0" type='double'/>
+      <param name="jerk_limit_weight" value="2.0" type='double'/>
+      <param name="velocity_limit_weight" value="10.0" type='double'/>
+      <param name="velocity_limit" value="4.0" type='double'/>
+      <param name="acceleration_limit" value="6.0" type='double'/>
+      <param name="jerk_limit" value="8.0" type='double'/>
+      <param name="discretization" value="0.01" type='double'/>
+      </node>
+
+        <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+<node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="0.6"/>
+    </node>
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="2.5 -0.5 2 0 3"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen"/>
+  </group>
+
+  <group ns="$(arg mav_name)14">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)14" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)4"/>
+      <arg name="x" value="-1.0"/>
+      <arg name="y" value="1.0"/>
+      <arg name="z" value="2.0"/> 	
+    </include>
+<node name="traj_generation" pkg="asl_msgs" type="MultiRobotTrajectory_node.py" respawn="true" clear_params="true" output="screen" >
+      <param name="collision_weight" value="10.0" type='double'/>
+      <param name="dynamics_weight" value="1.0" type='double'/>
+      <param name="time_weight" value="10.0" type='double'/>
+      <param name="acceleration_limit_weight" value="2.0" type='double'/>
+      <param name="jerk_limit_weight" value="2.0" type='double'/>
+      <param name="velocity_limit_weight" value="10.0" type='double'/>
+      <param name="velocity_limit" value="4.0" type='double'/>
+      <param name="acceleration_limit" value="6.0" type='double'/>
+      <param name="jerk_limit" value="8.0" type='double'/>
+      <param name="discretization" value="0.01" type='double'/>
+      </node>
+
+    <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+<node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="0.6"/>
+    </node>
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="1 -2 2 0 2"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen"/>
+  </group>
+
+  <group ns="$(arg mav_name)15">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)15" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)5"/>
+      <arg name="x" value="0.0"/>
+      <arg name="y" value="0.0"/>
+      <arg name="z" value="2.0"/> 	
+    </include>
+<node name="traj_generation" pkg="asl_msgs" type="MultiRobotTrajectory_node.py" respawn="true" clear_params="true" output="screen" >
+      <param name="collision_weight" value="10.0" type='double'/>
+      <param name="dynamics_weight" value="1.0" type='double'/>
+      <param name="time_weight" value="10.0" type='double'/>
+      <param name="acceleration_limit_weight" value="2.0" type='double'/>
+      <param name="jerk_limit_weight" value="2.0" type='double'/>
+      <param name="velocity_limit_weight" value="10.0" type='double'/>
+      <param name="velocity_limit" value="4.0" type='double'/>
+      <param name="acceleration_limit" value="6.0" type='double'/>
+      <param name="jerk_limit" value="8.0" type='double'/>
+      <param name="discretization" value="0.01" type='double'/>
+      </node>
+
+    <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+<node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="0.6"/>
+    </node>
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="2 2 2 0 2"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen"/>
+  </group>
+
+  <group ns="$(arg mav_name)16">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)16" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)1"/>
+      <arg name="x" value="1.0"/>
+      <arg name="y" value="-1.0"/>
+      <arg name="z" value="2.0"/> 	
+    </include>
+<node name="traj_generation" pkg="asl_msgs" type="MultiRobotTrajectory_node.py" respawn="true" clear_params="true" output="screen" >
+      <param name="collision_weight" value="10.0" type='double'/>
+      <param name="dynamics_weight" value="1.0" type='double'/>
+      <param name="time_weight" value="10.0" type='double'/>
+      <param name="acceleration_limit_weight" value="2.0" type='double'/>
+      <param name="jerk_limit_weight" value="2.0" type='double'/>
+      <param name="velocity_limit_weight" value="10.0" type='double'/>
+      <param name="velocity_limit" value="4.0" type='double'/>
+      <param name="acceleration_limit" value="6.0" type='double'/>
+      <param name="jerk_limit" value="8.0" type='double'/>
+      <param name="discretization" value="0.01" type='double'/>
+      </node>
+
+        <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+    <node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="0.6"/>
+    </node>
+	<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen"/>	
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="3 -1 1 0 2"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  </group>
+
+  <group ns="$(arg mav_name)17">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)17" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)2"/>
+      <arg name="x" value="1.0"/>
+      <arg name="y" value="1.0"/>
+      <arg name="z" value="2.0"/> 	>
+    </include>
+<node name="traj_generation" pkg="asl_msgs" type="MultiRobotTrajectory_node.py" respawn="true" clear_params="true" output="screen" >
+      <param name="collision_weight" value="10.0" type='double'/>
+      <param name="dynamics_weight" value="1.0" type='double'/>
+      <param name="time_weight" value="10.0" type='double'/>
+      <param name="acceleration_limit_weight" value="2.0" type='double'/>
+      <param name="jerk_limit_weight" value="2.0" type='double'/>
+      <param name="velocity_limit_weight" value="10.0" type='double'/>
+      <param name="velocity_limit" value="4.0" type='double'/>
+      <param name="acceleration_limit" value="6.0" type='double'/>
+      <param name="jerk_limit" value="8.0" type='double'/>
+      <param name="discretization" value="0.01" type='double'/>
+      </node>
+
+        <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+<node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="0.6"/>
+    </node>
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="1 -1 2 0 2"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen"/>
+  </group>
+
+  <group ns="$(arg mav_name)18">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)18" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)3"/>
+      <arg name="x" value="-1.0"/>
+      <arg name="y" value="-1.0"/>
+      <arg name="z" value="2.0"/> 	
+    </include>
+<node name="traj_generation" pkg="asl_msgs" type="MultiRobotTrajectory_node.py" respawn="true" clear_params="true" output="screen" >
+      <param name="collision_weight" value="10.0" type='double'/>
+      <param name="dynamics_weight" value="1.0" type='double'/>
+      <param name="time_weight" value="10.0" type='double'/>
+      <param name="acceleration_limit_weight" value="2.0" type='double'/>
+      <param name="jerk_limit_weight" value="2.0" type='double'/>
+      <param name="velocity_limit_weight" value="10.0" type='double'/>
+      <param name="velocity_limit" value="4.0" type='double'/>
+      <param name="acceleration_limit" value="6.0" type='double'/>
+      <param name="jerk_limit" value="8.0" type='double'/>
+      <param name="discretization" value="0.01" type='double'/>
+      </node>
+
+        <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+<node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="0.6"/>
+    </node>
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="2.5 -0.5 2 0 3"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen"/>
+  </group>
+
+  <group ns="$(arg mav_name)19">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)19" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)4"/>
+      <arg name="x" value="-1.0"/>
+      <arg name="y" value="6.0"/>
+      <arg name="z" value="0.0"/> 	
+    </include>
+<node name="traj_generation" pkg="asl_msgs" type="MultiRobotTrajectory_node.py" respawn="true" clear_params="true" output="screen" >
+      <param name="collision_weight" value="10.0" type='double'/>
+      <param name="dynamics_weight" value="1.0" type='double'/>
+      <param name="time_weight" value="10.0" type='double'/>
+      <param name="acceleration_limit_weight" value="2.0" type='double'/>
+      <param name="jerk_limit_weight" value="2.0" type='double'/>
+      <param name="velocity_limit_weight" value="10.0" type='double'/>
+      <param name="velocity_limit" value="4.0" type='double'/>
+      <param name="acceleration_limit" value="6.0" type='double'/>
+      <param name="jerk_limit" value="8.0" type='double'/>
+      <param name="discretization" value="0.01" type='double'/>
+      </node>
+
+    <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+<node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="0.6"/>
+    </node>
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="1 -2 2 0 2"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen"/>
+  </group>
+
+  <group ns="$(arg mav_name)20">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="namespace" value="$(arg mav_name)20" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)5"/>
+      <arg name="x" value="1.0"/>
+      <arg name="y" value="-2.0"/>
+      <arg name="z" value="5.0"/> 	
+    </include>
+<node name="traj_generation" pkg="asl_msgs" type="MultiRobotTrajectory_node.py" respawn="true" clear_params="true" output="screen" >
+      <param name="collision_weight" value="10.0" type='double'/>
+      <param name="dynamics_weight" value="1.0" type='double'/>
+      <param name="time_weight" value="10.0" type='double'/>
+      <param name="acceleration_limit_weight" value="2.0" type='double'/>
+      <param name="jerk_limit_weight" value="2.0" type='double'/>
+      <param name="velocity_limit_weight" value="10.0" type='double'/>
+      <param name="velocity_limit" value="4.0" type='double'/>
+      <param name="acceleration_limit" value="6.0" type='double'/>
+      <param name="jerk_limit" value="8.0" type='double'/>
+      <param name="discretization" value="0.01" type='double'/>
+      </node>
+
+    <node name="mav_linear_mpc" pkg="mav_linear_mpc" type="mav_linear_mpc_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_linear_mpc)/resources/linear_mpc_$(arg mav_name).yaml" />
+      <rosparam file="$(find mav_disturbance_observer)/resources/disturbance_observer_$(arg mav_name).yaml"/>
+      <param name="verbose" value="true" />
+      <param name="use_rc_teleop" value="false" />
+      <param name="reference_frame" value="world" />
+    </node>
+<node name ="Size" pkg="asl_msgs" type="Size.py">
+    <param name="Size" value="0.6"/>
+    </node>
+    <node name="PID_attitude_controller" pkg="mav_lowlevel_attitude_controller" type="mav_pid_attitude_controller_node" respawn="true" clear_params="true" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <rosparam file="$(find mav_lowlevel_attitude_controller)/resources/PID_attitude_$(arg mav_name).yaml" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="4 4 2 0 2"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+<node name="Stateread" pkg="asl_msgs" type="stateread" respawn="true" clear_params="true" output="screen"/>
+  </group-->
+
+
+</launch>

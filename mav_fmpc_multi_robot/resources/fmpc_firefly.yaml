@@ -1,0 +1,29 @@
+
+
+mass: 1.56
+translation_drag_coefficients: [0.0,0.0,0.00]
+
+#controller weights
+q_position: [70,70,70]
+q_velocity: [50,50,50]
+q_acceleration: [50,50,50]
+r_jerk: [40,40,70]
+q_yaw: 25.0
+r_yaw_rate: 50.0
+
+#actuator limits
+thrust_max: 30
+thrust_min: 5
+angular_velocity_limit: 20
+
+#temporal parameters
+discretization: 0.2
+controller_sampling_time: 0.01
+time_horizon: 10
+
+#EFK Noise
+process_noise: [0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01]
+system_noise: [0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01]
+sampling_time: 0.01
+
+
